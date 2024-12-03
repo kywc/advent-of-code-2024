@@ -4,6 +4,7 @@ default-extensions:
   OverloadedStrings
 build-depends:
   base,
+  transformers,
   megaparsec
 -}
 
@@ -14,8 +15,8 @@ import Data.Bifunctor (bimap)
 import Control.Monad (void)
 import Control.Monad.Trans.Writer.CPS (WriterT)
 
--- type Parser = ParsecT () String (WriterT Integer IO)
-type Parser = ParsecT () String
+instance Monoid Integer where {mzero = 0; mappend = (+); mconcat = sum;}
+type Parser = ParsecT () String (WriterT Integer IO)
 type ParseError = ParseErrorBundle String ()
 
 dontDo :: Parser String
@@ -30,6 +31,6 @@ mulResult = between (string "mul(") (string ")") $ liftA2 (*) decimal (char ',' 
 main :: IO () -- (consume: Parser Integer) \mapsto IO (Either ParseError Integer)
 main = let consume = (eof >> return 0)  <|> (dontDo >> consume)
                                         <|> liftA2 (+) (mulResult <|> return 0) consume
-                                        -- <|> (anySingle >> consume)
-    in runParser consume "" <$> readFile "input" >>= \result -> print result
+                                        <|> (anySingle >> consume)
+    in runParserT consume "" <$> readFile "input" >>= \result -> print result
       
