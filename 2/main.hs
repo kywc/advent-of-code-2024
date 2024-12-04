@@ -1,29 +1,42 @@
+#!/usr/bin/env cabal
+{- cabal:
+default-extensions:
+  OverloadedStrings
+build-depends:
+  base,
+  text,
+  bytestring
+-}
+
 import GHC.Arr
 import qualified Data.Text as T
+import Data.Text ( Text, pack, unpack, concat, split, replace )
 import Data.Text.Encoding ( decodeUtf8 )
-import qualified Data.ByteString as BS
+import qualified Data.ByteString ( readFile )
 import Data.Maybe
 
 type Report = [Int]
 
 
 diffs :: Report -> [Int]
-diffs r = (-) <$> drop 1 r <*> r
+diffs r = zipWith (-) (drop 1 r) r
 
 
 isSafe :: [Int] -> Bool
-normalize l = ((min >= 1) && (max <= 3)) || ((min >= -3) && (max <= -1))
-   where (a, b) = (minimum l, maximum l)
+isSafe l = ((min >= 1) && (max <= 3)) || ((min >= -3) && (max <= -1))
+   where (min, max) = (minimum l, maximum l)
 
 parseReport :: Text -> Report
-parseReport txt = read $ T.unpack formatted
+parseReport txt = read $ unpack formatted
   where formatted = T.concat ["[", (replace " " "," txt), "]"]
 
 input :: FilePath -> IO [Report]
-input = (map parseReport . T.split (=='\n') . decodeUtf8) <$> BS.readFile
+input path = readFile path >>= \x -> 
+    return $ (map parseReport . split (=='\n') . pack) x
 
 main :: IO ()
-main = print . length . filter id . map isSafe . input "input"
+main = fmap (show . length . filter id . map isSafe . map diffs) (input "input") >>=
+   \x -> putStrLn x
 
 {-
 normalize :: [Int] -> Maybe [Int]

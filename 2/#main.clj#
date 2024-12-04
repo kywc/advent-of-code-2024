@@ -1,6 +1,0 @@
-(ns advent-2.core
-  (:require [clojure.java.io :as io]))
-
-(defn is-safe [list]
-      (if-let [(a b) (take 2 list)]
-        ))
