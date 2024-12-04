@@ -19,7 +19,8 @@ type Report = [Int]
 
 
 diffs :: Report -> [Int]
-diffs r = zipWith (-) (drop 1 r) r
+diffs r = if (null diff) then [0] else diff
+  where diff = zipWith (-) (drop 1 r) r
 
 
 isSafe :: [Int] -> Bool
