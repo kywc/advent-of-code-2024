@@ -2,15 +2,19 @@
 (require '[clojure.java.io :as io])
 (require '[clojure.string :as str])
 
-(def parse
-  (let [in (slurp (io/file "input"))]
-    (->> in
-      str/split-lines
+(def in2
+  (let [in1 (slurp (io/file "input"))]
+    (->> in1
+      (str/split-lines)
       (map (fn [x] (str/split x #"   ")))
-      interleave
-      (split-at (fn [x] (/ (count x 2)))))))
+      (apply interleave))))
 
-(->> parse
+(def in3 
+  (split-at (/ (count in2) 2) in2))
+
+(def in4 (->> in3
   (map (partial str/join ","))
-  (str/join "\n")
-  print)
+  (str/join #"\n"))) 
+
+(with-open [out (io/writer "output" :append true)]
+  (.write out in4))
