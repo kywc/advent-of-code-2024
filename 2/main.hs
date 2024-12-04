@@ -44,8 +44,8 @@ input path = readFile path >>= \x ->
     return $ (map parseReport . split (=='\n') . pack) x
 
 computation :: (->) [Report] (String, String)
-computation = map diffs >>> (map isSafe &&& map alternates) 
-                        >>> \(x,y) -> (filter id x, filterByList (map not x) y)
+computation = (arr (map diffs)) >>> ((arr (map isSafe)) &&& (arr (map alternates))) 
+                        >>> arr (\(x,y) -> (filter id x, filterByList (map not x) y))
                         >>> second (filter id . (map or) . map (map isSafe))
                         >>> both length
                         >>> both show >> both (++"\n")

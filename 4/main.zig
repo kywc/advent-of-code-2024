@@ -1,3 +1,7 @@
+var text: [140][140]u8 = undefined;
+var fba = std.heap.FixedBufferAllocator.init(&text);
+const alloc = fba.allocator();
+
 const Direction = enum(i2) {
     fwd = 1,
     rev = -1,
