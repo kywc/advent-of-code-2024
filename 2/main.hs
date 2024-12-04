@@ -13,17 +13,23 @@ import qualified Data.Text as T
 import Data.Text ( Text, pack, unpack, concat, split, replace )
 import Data.Text.Encoding ( decodeUtf8 )
 import qualified Data.ByteString ( readFile )
-import Data.Maybe
 
 type Report = [Int]
+type Deltas = [Int]
 
-
-diffs :: Report -> [Int]
+diffs :: Report -> Deltas
 diffs r = if (null diff) then [0] else diff
   where diff = zipWith (-) (drop 1 r) r
 
+alternates :: Deltas -> [Deltas]
+alternates diff
+    | k < 0     = []
+    | otherwise = [ take i diff ++ (fusions !! i) ++ drop (i+2) diff | i <- [0..k] ]
+    where 
+      fusions = zipWith (+) (drop 1 diff) diff
+      k = length diff - 2
 
-isSafe :: [Int] -> Bool
+isSafe :: Deltas -> Bool
 isSafe l = ((min >= 1) && (max <= 3)) || ((min >= -3) && (max <= -1))
    where (min, max) = (minimum l, maximum l)
 
@@ -40,7 +46,7 @@ main = fmap (show . length . filter id . map isSafe . map diffs) (input "input")
    \x -> putStrLn x
 
 {-
-normalize :: [Int] -> Maybe [Int]
+normalize :: Deltas -> Maybe Deltas
 normalize l
    | (a >= 1) && (b <= 3) = Just l
    | (a >= -3) && (b <= -1) = Just (map negate l)
