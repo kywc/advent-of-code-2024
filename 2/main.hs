@@ -5,14 +5,16 @@ default-extensions:
 build-depends:
   base,
   text,
-  bytestring
+  ghc
 -}
 
 import GHC.Arr
 import qualified Data.Text as T
 import Data.Text ( Text, pack, unpack, concat, split, replace )
-import Data.Text.Encoding ( decodeUtf8 )
-import qualified Data.ByteString ( readFile )
+-- import Data.Text.Encoding ( decodeUtf8 )
+-- import qualified Data.ByteString ( readFile )
+import GHC.Utils.Misc ( filterByList )
+import Control.Arrow
 
 type Report = [Int]
 type Deltas = [Int]
@@ -41,9 +43,15 @@ input :: FilePath -> IO [Report]
 input path = readFile path >>= \x -> 
     return $ (map parseReport . split (=='\n') . pack) x
 
-main :: IO ()
-main = fmap (show . length . filter id . map isSafe . map diffs) (input "input") >>=
-   \x -> putStrLn x
+computation :: (->) [Report] (String, String)
+computation = map diffs >>> (map isSafe &&& map alternates) 
+                        >>> \(x,y) -> (filter id x, filterByList (map not x) y)
+                        >>> second (filter id . (map or) . map (map isSafe))
+                        >>> both length
+                        >>> both show >> both (++"\n")
+                        
+main :: IO ((),())
+main = fmap computation (input "input") >>= \x -> both print
 
 {-
 normalize :: Deltas -> Maybe Deltas
