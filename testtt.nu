@@ -1,0 +1,1 @@
+["kljflkjs" "sajkldla"] | zip 0..1000 | each {|row| $row.0 | split chars | zip 0..1000 | filter { |x| $x.0 == "k" } | append $row.1 }
