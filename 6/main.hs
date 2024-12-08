@@ -6,7 +6,14 @@ type Pos = (Int,Int)
 data Dir = N | S | E | W
 data Endpt = Endpt { pos :: Pos, dir :: Dir }
 type Trail = [Endpt]
-obstacles :: [Pos]
+
+state :: IO ([Pos], Pos)
+state = do 
+    cells <- readFile "input"
+    let locs = flatten $ zipWith map (map (,) [1..]) $ map (zip [1..]) lines cells
+    (,) (scour '#' locs) $ fst (scour '^' locs)
+  where assoc   = \(a,(b,c)) -> ((a,b),c) 
+        scour c = map (fst $ filter (elem c . snd) $ assoc)
 
 way :: Dir -> (Int, Int)
 way N = (-1, 0)
