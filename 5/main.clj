@@ -3,8 +3,11 @@
 ; slurp for io
 (def rules
   (json/read-str (slurp "seq1.json")))
-(def rulemaps []
-  (let [rm #{}]
+(def updates
+  (json/read-str (slurp "updates.json")))
+
+(def rulemaps [] ; "lt" --> all pages that should come after it
+  (let [rm {}]
     (for [rule in rules]
       (if-let [lt (:lt rule)
                gt (:gt rule)
@@ -13,3 +16,11 @@
         (assoc rm (str lt) #{ gt })))
     rm)
 rm)
+
+(def main []
+  (defn inner-reducr [s item]
+    (conj (disj s item) #{ (get rulemaps (str item)) }))
+  (defn outer-map [update]
+    (if (== (count (reduce reducr #{} update)) 0)
+       
+
