@@ -1,0 +1,1 @@
+cat input | lines | split words | to json | jq '.[] | {result: (.[0]), sequence: (.[1:] | join(","))}' | save input.json

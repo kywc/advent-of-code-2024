@@ -1,3 +1,3 @@
 cat input | parse "{lt}|{gt}" | to json | tee {save rules.json} | to nuon | save rules.nuon
 cat input | lines | reverse | take while {|| str contains ','} | each {|| from csv -n} | to json | tee {save updates.json} | to nuon | save updates.nuon
-var temp = (cat rules.json | from json | collect { |x| $x.lt } | each {|| into int})
+var temp = (cat rules.json | from json | collect { |x| $x.lt } | each {|| into int})cat updates.json | from json | each { |row| $row | values | flatten } | save seqs1.json
